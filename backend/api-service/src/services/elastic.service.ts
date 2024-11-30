@@ -46,7 +46,7 @@ export class ElasticService {
     // }
 
     async searchFiles(searchRequest: SearchRequest): Promise<SearchResponse[]> {
-            const response: any = await this.client.search<ElasticsearchSearchResponse>({
+            const response = await this.client.search<ElasticsearchSearchResponse>({
                 index: FILE_INDEX_NAME,
                 body: {
                     query: searchRequest.query.trim() 
@@ -86,13 +86,13 @@ export class ElasticService {
                     // size: 100 // Limit to prevent overwhelming results
                 }
             });
+            // console.log("response", response.hits.hits)
 
-            return response.body.hits.hits.map((hit: ElasticsearchHit) => ({
-                filename: hit._source.filename,
-                url: hit._source.url,
-                text: hit._source.text,
+            return response.hits.hits.map((hit: any) => ({
+                filename: hit._source?.filename,
+                url: hit._source?.url,
+                text: hit._source?.text,
                 score: hit._score
-            }));
-        
+            }))
     }
 }
