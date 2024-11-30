@@ -30,30 +30,29 @@ export class ElasticService {
         const response: ApiResponse<ElasticsearchSearchResponse, unknown> = await this.client.search<ElasticsearchSearchResponse>({
             index: FILE_INDEX_NAME,
             body: {
-                "query": {
-                    "multi_match": {
-                      "query": searchRequest.query,
-                      "fields": [
-                        "text",
-                        "filename^2"
-                      ],
-                      "fuzziness": "AUTO"
+                query: searchRequest.query.trim() 
+                    ? {
+                        multi_match: {
+                            query: searchRequest.query,
+                            fields: [
+                                "text",
+                                "filename^2"
+                            ],
+                            fuzziness: "AUTO"
+                        }
                     }
-                  },
-                  "highlight": {
-                    "fields": {
-                      "text": {}
+                    : {
+                        match_all: {}
+                    },
+                highlight: {
+                    fields: {
+                        text: {}
                     }
-                  }
-                // query: {
-                //     match: {
-                //         text: searchRequest.query,
-                //     }
-                // }                
+                },
+                size: 100 // Limit to prevent overwhelming results
             }
         });
 
-        // console.log("Response: ", response.body.hits.hits);
         return response.body.hits.hits.map((hit: ElasticsearchHit) => ({
             filename: hit._source.filename,
             url: hit._source.url,

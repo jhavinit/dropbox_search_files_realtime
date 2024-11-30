@@ -16,10 +16,10 @@ export class SearchController {
                 limit: req.query.limit ? parseInt(req.query.limit as string) : undefined
             };
 
-            if (!searchRequest.query) {
-                res.status(400).json({ error: 'Search query is required' });
-                return;
-            }
+            // if (!searchRequest.query) {
+            //     res.status(400).json({ error: 'Search query is required' });
+            //     return;
+            // }
 
             const results = await this.elasticService.searchFiles(searchRequest);
             res.json(results);
