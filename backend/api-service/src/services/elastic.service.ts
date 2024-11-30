@@ -34,15 +34,30 @@ export class ElasticService {
                 body: {
                     query: searchRequest.query.trim() 
                         ? {
-                            multi_match: {
-                                query: searchRequest.query,
-                                fields: [
-                                    "text",
-                                    "filename^2"
+                              "bool": {
+                                "should": [
+                                  {
+                                    "regexp": {
+                                      "filename": {
+                                        "value": ".*" + searchRequest.query.trim() + ".*",
+                                        "case_insensitive": true
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "match": {
+                                      "text": {
+                                        "query": searchRequest.query.trim(),
+                                        "analyzer": "custom_analyzer",
+                                        "fuzziness": "AUTO",         
+                                        "operator": "and"
+                                      }
+                                    }
+                                  }
                                 ],
-                                fuzziness: "AUTO"
-                            }
-                        }
+                                "minimum_should_match": 1
+                              }
+                          }
                         : {
                             match_all: {}
                         },

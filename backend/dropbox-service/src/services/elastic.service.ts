@@ -39,16 +39,57 @@ export class ElasticService {
             await this.client.indices.create({
                 index: FILE_INDEX_NAME,
                 body: {
-                    mappings: {
-                        properties: {
-                            filename: { type: 'keyword' },
-                            url: { type: 'keyword' },
-                            text: { 
-                                type: 'text',
-                            }
+                    "settings": {
+                        "index.max_ngram_diff": 7,
+                      "analysis": {
+                        "analyzer": {
+                          "custom_analyzer": {
+                            "tokenizer": "standard",
+                            "filter": [
+                              "lowercase",
+                              "synonym_filter",
+                              "ngram_filter"
+                            ]
+                          },
+                          "search_analyzer": {
+                            "tokenizer": "standard",
+                            "filter": [
+                              "lowercase",
+                              "synonym_filter"
+                            ]
+                          }
+                        },
+                        "filter": {
+                          "synonym_filter": {
+                            "type": "synonym",
+                            "synonyms": [
+                              "hi, hello"  // Add more synonyms as needed
+                            ]
+                          },
+                          "ngram_filter": {
+                            "type": "ngram",
+                            "min_gram": 3,
+                            "max_gram": 10
+                          }
                         }
+                      }
+                    },
+                    "mappings": {
+                      "properties": {
+                        "text": {
+                          "type": "text",
+                          "analyzer": "custom_analyzer",
+                          "search_analyzer": "search_analyzer"
+                        },
+                        "filename": {
+                          "type": "keyword"
+                        },
+                        "url": {
+                          "type": "keyword"
+                        }
+                      }
                     }
-                }
+                  }
             });
             logger.info(`Created index: ${FILE_INDEX_NAME}`);
         } else {
