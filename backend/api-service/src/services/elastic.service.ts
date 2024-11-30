@@ -1,5 +1,5 @@
-import { ApiResponse, Client } from '@elastic/elasticsearch';
-import { ELASTICSEARCH_URL, FILE_INDEX_NAME } from '../constants/app.constants';
+import { Client } from '@elastic/elasticsearch';
+import { ELASTIC_PASSWORD, ELASTIC_USERNAME, ELASTICSEARCH_URL, FILE_INDEX_NAME } from '../constants/app.constants';
 import { SearchRequest, SearchResponse } from '../interfaces/search.interface';
 
 interface ElasticsearchHitSource {
@@ -23,13 +23,30 @@ export class ElasticService {
     private client: Client;
 
     constructor() {
+
         this.client = new Client({ 
-            node: ELASTICSEARCH_URL
+            node: ELASTICSEARCH_URL,
+            auth: {
+                    username: ELASTIC_USERNAME,      // Replace with your username (if using basic auth)
+                    password: ELASTIC_PASSWORD       // Replace with your password (if using basic auth)
+                // apiKey: ELASTIC_KEY
+              },
         });
+        // this.getAllIndices();
     }
 
+    // async getAllIndices(): Promise<any> {
+    //     try {
+    //         console.log('called');
+    //         console.log(await this.client.cat.indices({ format: 'json' }));
+    //     } catch(error) {
+    //         console.log(error)
+    //     }
+
+    // }
+
     async searchFiles(searchRequest: SearchRequest): Promise<SearchResponse[]> {
-            const response: ApiResponse<ElasticsearchSearchResponse, unknown> = await this.client.search<ElasticsearchSearchResponse>({
+            const response = await this.client.search<ElasticsearchSearchResponse>({
                 index: FILE_INDEX_NAME,
                 body: {
                     query: searchRequest.query.trim() 
@@ -69,13 +86,13 @@ export class ElasticService {
                     // size: 100 // Limit to prevent overwhelming results
                 }
             });
+            // console.log("response", response.hits.hits)
 
-            return response.body.hits.hits.map((hit: ElasticsearchHit) => ({
-                filename: hit._source.filename,
-                url: hit._source.url,
-                text: hit._source.text,
+            return response.hits.hits.map((hit: any) => ({
+                filename: hit._source?.filename,
+                url: hit._source?.url,
+                text: hit._source?.text,
                 score: hit._score
-            }));
-        
+            }))
     }
 }
