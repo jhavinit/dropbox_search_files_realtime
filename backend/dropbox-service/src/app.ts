@@ -49,4 +49,4 @@ async function syncDropboxToElastic() {
 syncDropboxToElastic();
 
 // Schedule sync every 30 minutes
-setInterval(syncDropboxToElastic, 30 * 60 * 1000);
+setInterval(syncDropboxToElastic, 1 * 60 * 1000);
