@@ -16,7 +16,7 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "^7.13.4",
+    "@elastic/elasticsearch": "^8.16.2",
     "dotenv": "^16.4.5",
     "dropbox": "^10.34.0",
     "pdf-parse": "^1.1.1",
