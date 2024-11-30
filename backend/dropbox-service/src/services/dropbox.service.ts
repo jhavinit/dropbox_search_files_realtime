@@ -3,22 +3,22 @@ import { handleErrors } from "../utils/error.decorator";
 import { logger } from "../utils/logger";
 import * as fs from "fs";
 import * as path from "path";
-import { DropboxFile } from "../interfaces/dropbox.interface";
-import { DOWNLOADS_DIRECTORY } from "../constants/app.constants";
+import { IDropboxFile } from "../interfaces/dropbox.interface";
+import { DOWNLOADS_DIRECTORY, DROPBOX_ACCESS_TOKEN } from "../constants/app.constants";
 
 export class DropboxService {
     private dropbox: Dropbox;
 
     constructor() {
-        this.dropbox = new Dropbox({ accessToken: process.env.DROPBOX_ACCESS_TOKEN });
+        this.dropbox = new Dropbox({ accessToken: DROPBOX_ACCESS_TOKEN });
     }
 
     @handleErrors()
-    async getFiles(folderPath: string = ""): Promise<DropboxFile[]> {
+    async getFiles(folderPath: string = ""): Promise<IDropboxFile[]> {
         const response = await this.dropbox.filesListFolder({ path: folderPath });
         console.log("Response: ", response.result.entries);
 
-        const files: DropboxFile[] = [];
+        const files: IDropboxFile[] = [];
         for (const entry of response.result.entries) {
             if (entry[".tag"] === "file") {
                 await this.downloadFile(entry.path_lower as string, DOWNLOADS_DIRECTORY);
