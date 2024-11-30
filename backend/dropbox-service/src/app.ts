@@ -4,6 +4,11 @@ import { extractText } from "./services/text-extract.service";
 import path from "path";
 import { DOWNLOADS_DIRECTORY } from "./constants/app.constants";
 import { ElasticService } from "./services/elastic.service";
+import express from 'express';
+
+// Initialize express app
+const app = express();
+const PORT = 3002;
 
 async function syncDropboxToElastic() {
     try {
@@ -16,15 +21,6 @@ async function syncDropboxToElastic() {
         // Fetch file metadata from Dropbox
         logger.info("Fetching file metadata from Dropbox...");
         const files = await dropboxService.getFiles();
-
-        // console.log(files);
-        // const files = [
-        //     {
-        //         name: "doc4_txt.txt",
-        //         path_lower: "doc4_txt.txt",
-        //         url: "doc4_txt.txt",
-        //     }            
-        // ];
 
         // read content from file and insert in elastic
         for (let file of files) {
@@ -45,8 +41,18 @@ async function syncDropboxToElastic() {
     }
 }
 
-// Run initial sync
-syncDropboxToElastic();
+// Basic health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+});
 
-// Schedule sync every 30 minutes
-setInterval(syncDropboxToElastic, 1 * 60 * 1000);
+// Start the server
+app.listen(PORT, () => {
+    logger.info(`Server is running on port ${PORT}`);
+    
+    // Run initial sync
+    syncDropboxToElastic();
+    
+    // Schedule sync every 30 minutes
+    setInterval(syncDropboxToElastic, 30 * 60 * 1000);
+});
