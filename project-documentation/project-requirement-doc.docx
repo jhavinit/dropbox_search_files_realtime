@@ -1,0 +1,24 @@
+Objective: Build a full-text search application that indexes documents from cloud storage (Dropbox, S3, etc.) and allows users to search content within files via API and UI.
+
+Core Features:
+
+Cloud Storage Integration: Connect to Dropbox or AWS S3 to fetch files.
+File Content Extraction:
+Support .txt, .pdf, and .docx.
+Use libraries like Apache Tika for text extraction.
+Indexing and Searching:
+Use Elasticsearch for full-text search capabilities.
+Store file metadata (e.g., name, URL, last modified date).
+API: Provide a RESTful API for search queries.
+Web Interface:
+Display search results with metadata and URLs.
+Add sorting and filtering options.
+
+Tech Stack:
+
+Backend: Python (Flask/FastAPI/Django Rest Framework)
+Search Engine: Elasticsearch
+File Parsing: Apache Tika, PyPDF2, python-docx
+Frontend: React.js
+Hosting: AWS, Heroku, or Docker Compose
+
