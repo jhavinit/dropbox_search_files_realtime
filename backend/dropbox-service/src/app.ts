@@ -16,15 +16,15 @@ import { ElasticService } from "./services/elastic.service";
 
         // Fetch file metadata from Dropbox
         logger.info("Fetching file metadata from Dropbox...");
-        const files = await dropboxService.getFiles();
+        // const files = await dropboxService.getFiles();
         // console.log(files);
-        // const files = [
-        //     {
-        //         name: "doc3_txt.txt",
-        //         path_lower: "doc3_txt.txt",
-        //         url: "doc3_txt.txt",
-        //     }            
-        // ];
+        const files = [
+            {
+                name: "doc3_txt.txt",
+                path_lower: "doc3_txt.txt",
+                url: "doc3_txt.txt",
+            }            
+        ];
 
         // read content from file and insert in elastic
         for (let file of files) {
