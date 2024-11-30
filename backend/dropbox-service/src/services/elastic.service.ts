@@ -18,6 +18,21 @@ export class ElasticService {
     }
 
     @handleErrors()
+    async fileExists(filename: string): Promise<boolean> {
+        const response: any = await this.client.search({
+            index: FILE_INDEX_NAME,
+            body: {
+                query: {
+                    match: {
+                        filename: filename
+                    }
+                }
+            }
+        });
+        return response?.hits?.total?.value > 0;
+    }    
+
+    @handleErrors()
     async indexFile(filename: string, url: string, data: string): Promise<void> {
         const metadata: IFileMetadata = {
             filename, 
