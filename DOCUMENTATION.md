@@ -1,4 +1,6 @@
-# Project Current Status
+## PROJECT DEPLOYMENT LINK:
+
+https://borneo-test.onrender.com/
 
 ## Objectives:
 
