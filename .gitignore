@@ -3,3 +3,6 @@ dist
 downloads
 build
 .env
+.vscode
+package-lock.json
+.DS_Store

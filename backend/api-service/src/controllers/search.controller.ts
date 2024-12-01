@@ -1,31 +1,45 @@
-import { Request, Response } from 'express';
-import { ElasticService } from '../services/elastic.service';
-import { SearchRequest } from '../interfaces/search.interface';
+/**
+ * @fileoverview Search controller for handling search-related HTTP requests
+ * Manages validation, error handling, and response formatting for search operations
+ */
 
-export class SearchController {
-    private elasticService: ElasticService;
+import { Request, Response } from "express";
+import { ElasticService } from "../services/elastic.service";
+import { ISearchRequest } from "../interfaces/search.interface";
+import { SortOrder } from "../enums/sort.enum";
+import { logInfo, logError } from "../utils/logger";
 
-    constructor() {
-        this.elasticService = new ElasticService();
+class SearchController {
+  private elasticService: ElasticService;
+
+  constructor() {
+    this.elasticService = new ElasticService();
+  }
+
+  search = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { query = "", sort } = req.query;
+
+      const searchRequest: ISearchRequest = {
+        query: query as string,
+        sort: sort as SortOrder,
+      };
+
+      logInfo("Processing search request", { query, sort });
+      const results = await this.elasticService.searchFiles(searchRequest);
+
+      res.json(results);
+    } catch (error: any) {
+      logError("Search failed", error);
+      res.status(500).json({
+        data: null,
+        error: {
+          message: "Failed to process search request",
+          details: error instanceof Error ? error.message : "Unknown error",
+        },
+      });
     }
-
-    search = async (req: Request, res: Response): Promise<void> => {
-        try {
-            const searchRequest: SearchRequest = {
-                query: req.query.q as string,
-                limit: req.query.limit ? parseInt(req.query.limit as string) : undefined
-            };
-
-            // if (!searchRequest.query) {
-            //     res.status(400).json({ error: 'Search query is required' });
-            //     return;
-            // }
-
-            const results = await this.elasticService.searchFiles(searchRequest);
-            res.json(results);
-        } catch (error) {
-            console.error('Search error:', error);
-            res.status(500).json({ error: 'Internal server error' });
-        }
-    };
+  };
 }
+
+export const searchController = new SearchController();

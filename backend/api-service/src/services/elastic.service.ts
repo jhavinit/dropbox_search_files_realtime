@@ -1,98 +1,140 @@
-import { Client } from '@elastic/elasticsearch';
-import { ELASTIC_PASSWORD, ELASTIC_USERNAME, ELASTICSEARCH_URL, FILE_INDEX_NAME } from '../constants/app.constants';
-import { SearchRequest, SearchResponse } from '../interfaces/search.interface';
+/**
+ * @fileoverview Elasticsearch service for managing search operations
+ * Handles connection and search functionality for document retrieval
+ *
+ * Features:
+ * - Fuzzy text search
+ * - Filename pattern matching
+ * - Result highlighting
+ * - Error handling with retries
+ */
 
-interface ElasticsearchHitSource {
+import { Client } from "@elastic/elasticsearch";
+import {
+  ELASTIC_PASSWORD,
+  ELASTIC_USERNAME,
+  ELASTICSEARCH_URL,
+  FILE_INDEX_NAME,
+} from "../constants/app.constants";
+import type {
+  ISearchRequest,
+  ISearchResponse,
+  IElasticsearchHitSource,
+  IElasticsearchSearchResponse,
+} from "../interfaces/search.interface";
+import { SortOrder } from "../enums/sort.enum";
+import { handleErrors, ElasticsearchError } from "../utils/error.decorator";
+import { logInfo, logDebug } from "../utils/logger";
+
+interface IElasticsearchHit {
+  _source: {
     filename: string;
     url: string;
     text: string;
-}
-
-interface ElasticsearchHit {
-    _source: ElasticsearchHitSource;
-    _score: number;
-}
-
-interface ElasticsearchSearchResponse {
-    hits: {
-        hits: ElasticsearchHit[];
-    };
+    createdAt: string;
+  };
+  _score: number;
+  highlight?: Record<string, string[]>;
 }
 
 export class ElasticService {
-    private client: Client;
+  private client: Client;
 
-    constructor() {
+  constructor() {
+    logInfo("Initializing ElasticService");
+    this.client = new Client({
+      node: ELASTICSEARCH_URL,
+      auth: {
+        username: ELASTIC_USERNAME,
+        password: ELASTIC_PASSWORD,
+      },
+    });
+  }
 
-        this.client = new Client({ 
-            node: ELASTICSEARCH_URL,
-            auth: {
-                    username: ELASTIC_USERNAME,      // Replace with your username (if using basic auth)
-                    password: ELASTIC_PASSWORD       // Replace with your password (if using basic auth)
-                // apiKey: ELASTIC_KEY
-              },
-        });
-        // this.getAllIndices();
-    }
+  /**
+   * Search for files based on query
+   * Supports fuzzy matching and pattern matching on filenames
+   *
+   * @param searchRequest - Search parameters
+   * @returns Promise resolving to search results
+   * @throws {ElasticsearchError} If search operation fails
+   */
+  @handleErrors({
+    transformError: (error) =>
+      new ElasticsearchError("Search operation failed", 500, error),
+  })
+  async searchFiles(searchRequest: ISearchRequest): Promise<any> {
+    logDebug("Starting file search", { query: searchRequest.query });
 
-    // async getAllIndices(): Promise<any> {
-    //     try {
-    //         console.log('called');
-    //         console.log(await this.client.cat.indices({ format: 'json' }));
-    //     } catch(error) {
-    //         console.log(error)
-    //     }
+    const response: IElasticsearchSearchResponse | any =
+      await this.client.search<IElasticsearchSearchResponse>({
+        index: FILE_INDEX_NAME,
+        body: this.buildSearchQuery(
+          searchRequest.query.trim(),
+          searchRequest.sort
+        ),
+      });
 
-    // }
+    logInfo("Search completed", {
+      query: searchRequest.query,
+      resultCount: response.hits.hits.length,
+    });
 
-    async searchFiles(searchRequest: SearchRequest): Promise<SearchResponse[]> {
-            const response = await this.client.search<ElasticsearchSearchResponse>({
-                index: FILE_INDEX_NAME,
-                body: {
-                    query: searchRequest.query.trim() 
-                        ? {
-                              "bool": {
-                                "should": [
-                                  {
-                                    "regexp": {
-                                      "filename": {
-                                        "value": ".*" + searchRequest.query.trim() + ".*",
-                                        "case_insensitive": true
-                                      }
-                                    }
-                                  },
-                                  {
-                                    "match": {
-                                      "text": {
-                                        "query": searchRequest.query.trim(),
-                                        "analyzer": "custom_analyzer",
-                                        "fuzziness": "AUTO",         
-                                        "operator": "and"
-                                      }
-                                    }
-                                  }
-                                ],
-                                "minimum_should_match": 1
-                              }
-                          }
-                        : {
-                            match_all: {}
-                        },
-                    highlight: {
-                        fields: {
-                            text: {}
-                        }
+    return response.hits.hits.map((hit: IElasticsearchHit) => ({
+      filename: hit._source.filename,
+      url: hit._source.url,
+      text: hit._source.text,
+      createdAt: hit._source.createdAt,
+    }));
+  }
+
+  private buildSearchQuery(
+    queryString: string,
+    sort?: SortOrder
+  ): Record<string, unknown> {
+    return {
+      sort: queryString
+        ? [
+            { _score: { order: "desc" } },
+            { createdAt: { order: sort || SortOrder.DESC } },
+          ]
+        : [{ createdAt: { order: sort || SortOrder.DESC } }],
+      query: queryString
+        ? {
+            bool: {
+              should: [
+                {
+                  regexp: {
+                    filename: {
+                      value: `.*${queryString}.*`,
+                      case_insensitive: true,
+                      boost: 2.0,
                     },
-                    // size: 100 // Limit to prevent overwhelming results
-                }
-            });
-            // console.log("response", response.hits.hits)
-
-            return response.hits.hits.map((hit: any) => ({
-                filename: hit._source?.filename,
-                url: hit._source?.url,
-                text: hit._source?.text,
-                score: hit._score
-            }))
-    }
+                  },
+                },
+                {
+                  match: {
+                    text: {
+                      query: queryString,
+                      analyzer: "custom_analyzer",
+                      fuzziness: "AUTO",
+                      operator: "and",
+                      boost: 1.0,
+                    },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          }
+        : {
+            match_all: {},
+          },
+      highlight: {
+        fields: {
+          text: {},
+        },
+      },
+    };
+  }
 }
