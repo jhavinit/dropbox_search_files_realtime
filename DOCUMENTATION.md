@@ -19,23 +19,27 @@
    - Using Elasticsearch Cloud's 14-day trial plan (from December 1, 2024) (if will stop after that)
    - Service availability limited to trial period
 
-2. **Deployment Considerations**
+2. **PDF (tika apache) ISSUE DUE TO RENDER.COM(JVM ENV SETUP) (working in local env)**
+
+   - Pdf files are not read right now in deployed solution because render.com is not allowing to setup jvm env vars and install deps. In local env this is working.
+
+3. **Deployment Considerations**
 
    - RENDER.com containers may become inactive during periods of inactivity but it comes up after some time automatically
    - Automatic or manual restart can be done for service restoration
 
-3. **File Monitoring Strategy**
+4. **File Monitoring Strategy**
 
    - Currently implementing polling-based file monitoring from dropbox in dropbox service
    - Webhook implementation preferred but limited by RENDER.com beacuse ssh access of instance is not there causing issues in development (webhook approach is better as event based design pattern suits the use case)
 
-4. **Server Configuration**
+5. **Server Configuration**
 
    - Running auxiliary server in Dropbox service
    - Required for RENDER.com web service classification
    - Not core to application logic
 
-5. **Search Functionality**
+6. **Search Functionality**
 
    - Extended search to include filename matching
    - Enhancement beyond original content-only requirement
