@@ -1,9 +1,5 @@
 # Dropbox Document Search Application
 
-## PROJECT DEPLOYMENT LINK:
-
-https://borneo-test.onrender.com/
-
 ## Please open Design/Development Document => DOCUMENTATION.md File
 
 ## Product Requirements Document (PRD)
