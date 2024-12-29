@@ -1,7 +1,5 @@
 ## PROJECT DEPLOYMENT LINK:
 
-https://borneo-test.onrender.com/
-
 ## Objectives:
 
 1. IMPLEMENT THE SOLUTION TO PULL FILES FROM DROPBOX + INDEX IN ELASTICSEARCH + API SERVICE + UI (with list if searched files with content/filename and link to original file) => <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrSLox2ia0u9peaoS7Sy19T60CQ4tO8JT46Q&s" width="20" height="20"/> DONE
