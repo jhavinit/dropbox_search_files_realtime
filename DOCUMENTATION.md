@@ -1,50 +1,5 @@
 ## PROJECT DEPLOYMENT LINK:
 
-## Objectives:
-
-1. IMPLEMENT THE SOLUTION TO PULL FILES FROM DROPBOX + INDEX IN ELASTICSEARCH + API SERVICE + UI (with list if searched files with content/filename and link to original file) => <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrSLox2ia0u9peaoS7Sy19T60CQ4tO8JT46Q&s" width="20" height="20"/> DONE
-
-2. HOSTING (render.com) => <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrSLox2ia0u9peaoS7Sy19T60CQ4tO8JT46Q&s" width="20" height="20"/> DONE
-
-3. PRD/DOCUMENTATION => <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrSLox2ia0u9peaoS7Sy19T60CQ4tO8JT46Q&s" width="20" height="20"/> DONE
-
-4. Support for TXT/DOCX/PDF(using tika (JVM) lib used using python script) => <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrSLox2ia0u9peaoS7Sy19T60CQ4tO8JT46Q&s" width="20" height="20"/> DONE
-
-5. Sort by created date for files => <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrSLox2ia0u9peaoS7Sy19T60CQ4tO8JT46Q&s" width="20" height="20"/> DONE
-
-## !! Important Notes and Assumptions !!
-
-1. **Elasticsearch Integration**
-
-   - Using Elasticsearch Cloud's 14-day trial plan (from December 1, 2024) (if will stop after that)
-   - Service availability limited to trial period
-
-2. **PDF (tika apache) ISSUE DUE TO RENDER.COM(JVM ENV SETUP) (working in local env)**
-
-   - Pdf files are not read right now in deployed solution because render.com is not allowing to setup jvm env vars and install deps. In local env this is working.
-
-3. **Deployment Considerations**
-
-   - RENDER.com containers may become inactive during periods of inactivity but it comes up after some time automatically
-   - Automatic or manual restart can be done for service restoration
-
-4. **File Monitoring Strategy**
-
-   - Currently implementing polling-based file monitoring from dropbox in dropbox service
-   - Webhook implementation preferred but limited by RENDER.com beacuse ssh access of instance is not there causing issues in development (webhook approach is better as event based design pattern suits the use case)
-
-5. **Server Configuration**
-
-   - Running auxiliary server in Dropbox service
-   - Required for RENDER.com web service classification
-   - Not core to application logic
-
-6. **Search Functionality**
-
-   - Extended search to include filename matching
-   - Enhancement beyond original content-only requirement
-   - Aligned with common cloud provider search patterns
-
 # Project Documentation
 
 This document discusses the requirements, assumptions, design, development, and deployment process of the Dropbox Search Application project.
@@ -255,11 +210,3 @@ This document discusses the requirements, assumptions, design, development, and 
 4. Deploy the dropbox service as container web service
 5. Deploy the api service as container web service
 6. Deploy the elasticsearch/kibana service as cloud in elasticsearch cloud
-
-## Things not taken up due to time constraints/outside of scope
-
-1. UI for handling folders
-2. Webhooks for file updates from dropbox
-3. Security (e.g., authentication, authorization, helmet, rate limiting etc)
-4. Error handling and logging for better understanding
-5. Scaling and performance optimization
